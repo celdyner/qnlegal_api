@@ -1,4 +1,7 @@
 const router = require("express").Router();
+const multer = require("multer");
+const { storage } = require("../cloudinary");
+const upload = multer({ storage });
 const {
   ensureAuthenticated,
   ensureAuthorized,
@@ -18,7 +21,7 @@ router.get("/stories", async (req, res) => {
   await getAll(req, res);
 });
 
-router.post("/stories", async (req, res) => {
+router.post("/stories", upload.single("image"), async (req, res) => {
   await addOne(req, res);
 });
 
@@ -39,8 +42,8 @@ router.get("/stories/:id", async (req, res) => {
 
 router.delete(
   "/stories/:id",
-  ensureAuthenticated,
-  ensureAuthorized(["admin"]),
+  // ensureAuthenticated,
+  // ensureAuthorized(["admin"]),
   async (req, res) => {
     await removeOne(req, res);
   }

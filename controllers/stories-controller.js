@@ -3,11 +3,15 @@ const paginate = require("express-paginate");
 const Comment = require("../models/comment");
 
 const addOne = async (req, res) => {
+  const { title, topic, body } = req.body;
   const newRecord = new Story({
-    ...req.body,
+    title: title,
+    topic: topic,
+    body: body,
+    imageUrl: req.file.path,
     createdBy: req.body.userId,
   });
-
+  newRecord.imgUrl = req.file.path;
   try {
     if (!newRecord.slug) {
       newRecord.slug = generateSlug(newRecord.title);
@@ -27,7 +31,7 @@ const addOne = async (req, res) => {
 
 const removeOne = async (req, res) => {
   try {
-    const deleted = await Story.findByIdAndDelete(req.param.id);
+    const deleted = await Story.findByIdAndDelete(req.params.id);
     if (!deleted) {
       return res.status(404).json({
         message: "Item not found",
@@ -48,7 +52,12 @@ const removeOne = async (req, res) => {
 
 const updateOne = async (req, res) => {
   try {
-    await Story.findByIdAndUpdate(req.param.id, req.body);
+    const { topic, title, body } = req.body;
+    const story = await Story.findById(req.params.id);
+    story.topic = topic;
+    story.title = title;
+    story.body = body;
+    await story.save();
     return res.status(201).json({
       message: "Item successfully updated",
       success: true,
@@ -73,15 +82,15 @@ const getAll = async (req, res) => {
         .exec(),
       Story.count({}),
     ]);
-    const pageCount = Math.ceil(itemCount / req.query.limit);
+    // const pageCount = Math.ceil(itemCount / req.query.limit);
     return res.status(201).json({
-      object: "list",
-      has_more: paginate.hasNextPages(req)(pageCount),
+      // object: "list",
+      // has_more: paginate.hasNextPages(req)(pageCount),
       data: results,
-      pageCount,
-      itemCount,
-      currentPage: req.query.page,
-      pages: paginate.getArrayPages(req)(3, pageCount, req.query.page),
+      // pageCount,
+      // itemCount,
+      // currentPage: req.query.page,
+      // pages: paginate.getArrayPages(req)(3, pageCount, req.query.page),
     });
   } catch (err) {
     return res.status(500).json({
