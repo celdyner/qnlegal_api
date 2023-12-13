@@ -9,6 +9,7 @@ const addOne = async (req, res) => {
     topic: topic,
     body: body,
     imageUrl: req.file.path,
+    imageName: req.file.filename,
     createdBy: req.body.userId,
   });
   newRecord.imgUrl = req.file.path;

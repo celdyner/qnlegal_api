@@ -13,6 +13,11 @@ const StorySchema = new Schema(
       required: true,
     },
 
+    imageName: {
+      type: String,
+      required: true,
+    },
+
     slug: {
       type: String,
       unique: true,

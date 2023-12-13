@@ -13,4 +13,28 @@ const storage = new CloudinaryStorage({
   allowedFormats: ["jpeg", "jpg", "png"],
 });
 
-module.exports = { cloudinary, storage };
+const uploadVideoHandler = async (video) => {
+  try {
+    const uploadedVideo = await cloudinary.uploader.upload(video, {
+      resource_type: "video",
+    });
+    return uploadedVideo;
+  } catch (error) {
+    return error;
+  }
+};
+
+// const uploadImageHandler = async (image) => {
+//   try {
+//     const uploadedImage = await cloudinary.uploader.upload(image);
+//     return uploadedImage;
+//   } catch (error) {
+//     return error;
+//   }
+// };
+
+module.exports = {
+  uploadVideoHandler,
+  cloudinary,
+  storage,
+};

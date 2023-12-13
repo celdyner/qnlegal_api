@@ -1,11 +1,15 @@
 const Video = require("../models/video");
-const paginate = require("express-paginate");
+// const paginate = require("express-paginate");
 const Comment = require("../models/comment");
 
 const addOne = async (req, res) => {
+  const { title, topic, videoUrl, videoName } = req.body;
   try {
     const newRecord = new Video({
-      ...req.body,
+      title: title,
+      topic: topic,
+      videoUrl: videoUrl,
+      videoName: videoName,
       createdBy: "6532b9977408827e2207b7a5",
     });
     await newRecord.save();
@@ -23,7 +27,7 @@ const addOne = async (req, res) => {
 
 const removeOne = async (req, res) => {
   try {
-    const deleted = await Video.findByIdAndDelete(req.param.id);
+    const deleted = await Video.findByIdAndDelete(req.params.id);
     if (!deleted) {
       return res.status(404).json({
         message: "Item not found",
@@ -59,25 +63,9 @@ const updateOne = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const [results, itemCount] = await Promise.all([
-      Video.find({})
-        .populate("category", "title")
-        .sort({ createdAt: -1 })
-        .limit(req.query.limit)
-        .skip(req.skip)
-        .lean()
-        .exec(),
-      Video.count({}),
-    ]);
-    const pageCount = Math.ceil(itemCount / req.query.limit);
+    const videos = await Video.find({});
     return res.status(201).json({
-      object: "list",
-      has_more: paginate.hasNextPages(req)(pageCount),
-      data: results,
-      pageCount,
-      itemCount,
-      currentPage: req.query.page,
-      pages: paginate.getArrayPages(req)(3, pageCount, req.query.page),
+      data: videos,
     });
   } catch (err) {
     return res.status(500).json({

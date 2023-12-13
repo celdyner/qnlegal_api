@@ -12,13 +12,13 @@ const VideoSchema = new Schema(
     },
 
     topic: { type: String, required: true },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-    },
 
     videoUrl: { type: String, required: true },
+
+    videoName: {
+      type: String,
+      required: true,
+    },
 
     viewsCount: {
       type: Number,

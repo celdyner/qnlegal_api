@@ -1,4 +1,7 @@
 const router = require("express").Router();
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+const { uploadVideoHandler } = require("../cloudinary");
 const {
   ensureAuthenticated,
   ensureAuthorized,
@@ -19,8 +22,15 @@ router.get("/videos", async (req, res) => {
 });
 
 //ensureAuthenticated, ensureAuthorized(["admin"]), validationRules(), validate,
-router.post("/videos", async (req, res) => {
-  await addOne(req, res);
+router.post("/videos", upload.single("video"), async (req, res) => {
+  try {
+    const video = await uploadVideoHandler(req.file.path);
+    req.body.videoUrl = video.secure_url;
+    req.body.videoName = video.original_filename;
+    await addOne(req, res);
+  } catch (err) {
+    return err;
+  }
 });
 
 router.put(
@@ -40,8 +50,8 @@ router.get("/videos/:id", async (req, res) => {
 
 router.delete(
   "/videos/:id",
-  ensureAuthenticated,
-  ensureAuthorized(["admin"]),
+  // ensureAuthenticated,
+  // ensureAuthorized(["admin"]),
   async (req, res) => {
     await removeOne(req, res);
   }
