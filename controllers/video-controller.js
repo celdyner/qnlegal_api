@@ -3,14 +3,21 @@ const Video = require("../models/video");
 const Comment = require("../models/comment");
 
 const addOne = async (req, res) => {
-  const { title, topic, videoUrl, videoName } = req.body;
+  if (req.role !== "Administrator" && req.role !== "admin") {
+    return res.status(404).json({
+      message: "Not authorized",
+      success: false,
+    });
+  }
+  const { title, topic, videoUrl, videoName, trending } = req.body;
   try {
     const newRecord = new Video({
       title: title,
       topic: topic,
       videoUrl: videoUrl,
       videoName: videoName,
-      createdBy: "6532b9977408827e2207b7a5",
+      createdBy: req.userId,
+      trending: trending,
     });
     await newRecord.save();
     return res.status(201).json({
@@ -26,6 +33,12 @@ const addOne = async (req, res) => {
 };
 
 const removeOne = async (req, res) => {
+  if (req.role !== "Administrator" && req.role !== "admin") {
+    return res.status(404).json({
+      message: "Not authorized",
+      success: false,
+    });
+  }
   try {
     const deleted = await Video.findByIdAndDelete(req.params.id);
     if (!deleted) {
@@ -47,8 +60,25 @@ const removeOne = async (req, res) => {
 };
 
 const updateOne = async (req, res) => {
+  if (req.role !== "Administrator" && req.role !== "admin") {
+    return res.status(404).json({
+      message: "Not authorized",
+      success: false,
+    });
+  }
   try {
-    await Video.findByIdAndUpdate(req.param.id, req.body);
+    const { topic, title, trending } = req.body;
+    const video = await Video.findById(req.params.id);
+    if (video.createdBy !== req.userId && req.role !== "Administrator") {
+      return res.status(401).json({
+        message: "Unauthorized access",
+        success: false,
+      });
+    }
+    video.topic = topic;
+    video.title = title;
+    video.trending = trending;
+    await video.save();
     return res.status(201).json({
       message: "Item successfully updated",
       success: true,

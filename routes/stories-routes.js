@@ -2,10 +2,7 @@ const router = require("express").Router();
 const multer = require("multer");
 const { storage } = require("../cloudinary");
 const upload = multer({ storage });
-const {
-  ensureAuthenticated,
-  ensureAuthorized,
-} = require("../middleware/auth-middleware");
+const { getAuthResults } = require("../middleware/auth-middleware");
 const { validationRules, validate } = require("../validations/story-validator");
 const {
   addOne,
@@ -21,33 +18,26 @@ router.get("/stories", async (req, res) => {
   await getAll(req, res);
 });
 
-router.post("/stories", upload.single("image"), async (req, res) => {
-  await addOne(req, res);
-});
-
-router.put(
-  "/stories/:id",
-  // ensureAuthenticated,
-  // ensureAuthorized(["admin"]),
-  // validationRules(),
-  // validate,
+router.post(
+  "/stories",
+  getAuthResults,
+  upload.single("image"),
   async (req, res) => {
-    await updateOne(req, res);
+    await addOne(req, res);
   }
 );
+
+router.put("/stories/:id", getAuthResults, async (req, res) => {
+  await updateOne(req, res);
+});
 
 router.get("/stories/:id", async (req, res) => {
   await getOne(req, res);
 });
 
-router.delete(
-  "/stories/:id",
-  // ensureAuthenticated,
-  // ensureAuthorized(["admin"]),
-  async (req, res) => {
-    await removeOne(req, res);
-  }
-);
+router.delete("/stories/:id", getAuthResults, async (req, res) => {
+  await removeOne(req, res);
+});
 
 router.get("/stories/trending", async (req, res) => {
   await getTopStories(req, res);

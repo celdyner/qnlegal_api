@@ -20,6 +20,10 @@ const VideoSchema = new Schema(
       required: true,
     },
 
+    trending: {
+      type: String,
+    },
+
     viewsCount: {
       type: Number,
       default: 0,

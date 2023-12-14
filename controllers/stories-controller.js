@@ -3,14 +3,21 @@ const paginate = require("express-paginate");
 const Comment = require("../models/comment");
 
 const addOne = async (req, res) => {
-  const { title, topic, body } = req.body;
+  if (req.role !== "Administrator" && req.role !== "admin") {
+    return res.status(404).json({
+      message: "Not authorized",
+      success: false,
+    });
+  }
+  const { title, topic, body, trending } = req.body;
   const newRecord = new Story({
     title: title,
     topic: topic,
     body: body,
     imageUrl: req.file.path,
     imageName: req.file.filename,
-    createdBy: req.body.userId,
+    createdBy: req.userId,
+    trending: trending,
   });
   newRecord.imgUrl = req.file.path;
   try {
@@ -31,7 +38,20 @@ const addOne = async (req, res) => {
 };
 
 const removeOne = async (req, res) => {
+  if (req.role !== "Administrator" && req.role !== "admin") {
+    return res.status(404).json({
+      message: "Not authorized",
+      success: false,
+    });
+  }
   try {
+    const story = await Story.findById(req.params.id);
+    if (story.createdBy !== req.userId && req.role !== "Administrator") {
+      return res.status(401).json({
+        message: "Unauthorized access",
+        success: false,
+      });
+    }
     const deleted = await Story.findByIdAndDelete(req.params.id);
     if (!deleted) {
       return res.status(404).json({
@@ -52,9 +72,21 @@ const removeOne = async (req, res) => {
 };
 
 const updateOne = async (req, res) => {
+  if (req.role !== "Administrator" && req.role !== "admin") {
+    return res.status(404).json({
+      message: "Not authorized",
+      success: false,
+    });
+  }
   try {
     const { topic, title, body } = req.body;
     const story = await Story.findById(req.params.id);
+    if (story.createdBy !== req.userId && req.role !== "Administrator") {
+      return res.status(401).json({
+        message: "Unauthorized access",
+        success: false,
+      });
+    }
     story.topic = topic;
     story.title = title;
     story.body = body;
@@ -144,11 +176,10 @@ const getOneBySlug = async (req, res) => {
 
 const getOne = async (req, res) => {
   try {
-    let item = await Story.findByIdAndUpdate(req.param.id, {
+    let item = await Story.findByIdAndUpdate(req.params.id, {
       $inc: { viewsCount: 1 },
-    }).populate("category", "title");
+    }).populate("comment");
     if (item) {
-      item.comments = await Comment.find({ story: item._id });
       return res.status(200).json(item);
     }
     return res.status(404).json({

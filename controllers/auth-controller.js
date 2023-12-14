@@ -9,8 +9,7 @@ const register = async (data, role, res) => {
     const userTaken = await validateEmail(data.email);
     if (userTaken) {
       return res.status(400).json({
-        email: "Email is already taken",
-        message: "Registration failure",
+        message: "Email is already taken",
         success: false,
       });
     }
@@ -22,13 +21,14 @@ const register = async (data, role, res) => {
       ...data,
       password: hashedPassword,
       verificationCode: code,
-      role,
+      role: data.status,
     });
     await newUser.save();
     return res.status(201).json({
       message: "User Account created successfully",
       success: true,
     });
+    //SEND VERIFICATION EMAIL TO USER
   } catch (err) {
     return res.status(500).json({
       message: err.message,
@@ -59,26 +59,11 @@ const login = async (data, res) => {
           email: user.email,
           name: user.name,
         },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "60000",
-        }
+        process.env.JWT_SECRET
       );
-      let profile = {
-        email: user.email,
-        role: user.role,
-        name: user.name,
-      };
-      let result = {
-        user: profile,
-        token: token,
-        expiresIn: 60000,
-      };
 
       return res.status(200).json({
-        ...result,
-        messsage: "Login success",
-        success: true,
+        token: token,
       });
     } else {
       return res.status(403).json({
