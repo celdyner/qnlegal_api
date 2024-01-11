@@ -3,15 +3,14 @@ const Video = require("../models/video");
 const Comment = require("../models/comment");
 
 const addOne = async (req, res) => {
-  if (req.role !== "Administrator" && req.role !== "admin") {
+  if (req.role !== "admin") {
     return res.status(404).json({
       message: "Not authorized",
       success: false,
     });
   }
   const { title, topic, videoUrl, videoName, trending } = req.body;
-  try {
-    const newRecord = new Video({
+  const newRecord = new Video({
       title: title,
       topic: topic,
       videoUrl: videoUrl,
@@ -19,12 +18,18 @@ const addOne = async (req, res) => {
       createdBy: req.userId,
       trending: trending,
     });
-    await newRecord.save();
-    return res.status(201).json({
-      message: "Item is successfully created",
-      success: true,
-    });
-  } catch (err) {
+  
+    try {
+      if (!newRecord.slug) {
+        newRecord.slug = generateSlug(newRecord.title);
+      }
+      await newRecord.save();
+      return res.status(201).json({
+        message: "Item is successfully created",
+        success: true,
+      });
+    }
+    catch (err) {
     return res.status(500).json({
       message: err.message,
       success: false,
@@ -60,7 +65,7 @@ const removeOne = async (req, res) => {
 };
 
 const updateOne = async (req, res) => {
-  if (req.role !== "Administrator" && req.role !== "admin") {
+  if (req.role !== "admin") {
     return res.status(404).json({
       message: "Not authorized",
       success: false,
@@ -69,7 +74,7 @@ const updateOne = async (req, res) => {
   try {
     const { topic, title, trending } = req.body;
     const video = await Video.findById(req.params.id);
-    if (video.createdBy !== req.userId && req.role !== "Administrator") {
+    if (video.createdBy !== req.userId && req.role !== "admin") {
       return res.status(401).json({
         message: "Unauthorized access",
         success: false,
@@ -127,13 +132,17 @@ const getTopVideos = async (req, res) => {
 
 const getOneBySlug = async (req, res) => {
   try {
-    let item = await Video.findByIdAndUpdate(req.param.slug, {
-      $inc: { viewsCount: 1 },
-    }).populate("category", "title");
+    const item = await Video.findOneAndUpdate(
+      { slug: req.params.slug }, // Use req.params.slug for finding by slug
+      { $inc: { viewsCount: 1 } },
+      { new: true }
+    ).populate("category", "title");
+
     if (item) {
       item.comments = await Comment.find({ Video: item._id });
       return res.status(200).json(item);
     }
+
     return res.status(404).json({
       message: "Item not found",
       success: false,
@@ -148,13 +157,14 @@ const getOneBySlug = async (req, res) => {
 
 const getOne = async (req, res) => {
   try {
-    let item = await Video.findByIdAndUpdate(req.param.id, {
-      $inc: { viewsCount: 1 },
-    }).populate("category", "title");
+    const item = await Video.findById(req.params.id)
+      .populate("category", "title");
+
     if (item) {
       item.comments = await Comment.find({ Video: item._id });
       return res.status(200).json(item);
     }
+
     return res.status(404).json({
       message: "Item not found",
       success: false,
@@ -166,6 +176,21 @@ const getOne = async (req, res) => {
     });
   }
 };
+
+const generateSlug = (title) => {
+  const slugText = title
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+
+  return slugText;
+};
+
 
 module.exports = {
   addOne,

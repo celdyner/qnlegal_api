@@ -38,7 +38,7 @@ const addOne = async (req, res) => {
 };
 
 const removeOne = async (req, res) => {
-  if (req.role !== "Administrator" && req.role !== "admin") {
+  if (req.role !== "admin") {
     return res.status(404).json({
       message: "Not authorized",
       success: false,
@@ -46,7 +46,7 @@ const removeOne = async (req, res) => {
   }
   try {
     const story = await Story.findById(req.params.id);
-    if (story.createdBy !== req.userId && req.role !== "Administrator") {
+    if (story.createdBy !== req.userId && req.role !== "admin") {
       return res.status(401).json({
         message: "Unauthorized access",
         success: false,
@@ -72,7 +72,7 @@ const removeOne = async (req, res) => {
 };
 
 const updateOne = async (req, res) => {
-  if (req.role !== "Administrator" && req.role !== "admin") {
+  if (req.role !== "admin") {
     return res.status(404).json({
       message: "Not authorized",
       success: false,
@@ -81,7 +81,7 @@ const updateOne = async (req, res) => {
   try {
     const { topic, title, body } = req.body;
     const story = await Story.findById(req.params.id);
-    if (story.createdBy !== req.userId && req.role !== "Administrator") {
+    if (story.createdBy !== req.userId && req.role !== "admin") {
       return res.status(401).json({
         message: "Unauthorized access",
         success: false,

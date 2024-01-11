@@ -29,6 +29,11 @@ const VideoSchema = new Schema(
       default: 0,
     },
 
+    slug: {
+      type: String,
+      unique: true,
+    },
+
     category: {
       type: Schema.Types.ObjectId,
       ref: "Category",
