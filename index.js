@@ -8,16 +8,10 @@ const { connect } = require("mongoose");
 
 const app = express();
 
-// Enable CORS before other middleware
+
+
 app.use(cors());
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://qnlegal.org');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Credentials', 'true'); // Corrected header name
-  next();
-});
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -32,6 +26,7 @@ app.use(router);
 
 // Add a route handler for the root path ("/")
 app.get("/", (req, res) => {
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.send("Hello, this is your API root!");
 });
 
