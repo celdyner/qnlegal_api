@@ -43,9 +43,8 @@ const login = async (data, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      res.status(404).json({
-        message: "email login attempt",
-        email: "Incorrect email",
+      return res.status(404).json({
+        message: "Incorrect email",
         success: false,
       });
     }
@@ -67,18 +66,18 @@ const login = async (data, res) => {
       });
     } else {
       return res.status(403).json({
-        messsage: "Failed Login attempt",
-        email: "Incorrect Password",
-        success: true,
+        message: "Incorrect Password",
+        success: false,
       });
     }
   } catch (err) {
     return res.status(500).json({
-      messsage: err.message,
+      message: err.message,
       success: false,
     });
   }
 };
+
 
 const verify = async (data, res) => {
   try {
