@@ -7,9 +7,18 @@ const bodyParser = require("body-parser");
 const { connect } = require("mongoose");
 
 const app = express();
-const router = require("./routes/index");
 
+// Enable CORS before other middleware
 app.use(cors());
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://qnlegal.org');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Credentials', 'true'); // Corrected header name
+  next();
+});
+
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(passport.initialize());
@@ -17,6 +26,8 @@ require("./middleware/passport-middleware.js")(passport);
 app.use(bodyParser.json());
 
 app.use(paginate.middleware(process.env.LIMIT, process.env.MAX_LIMIT));
+
+const router = require("./routes/index");
 app.use(router);
 
 // Add a route handler for the root path ("/")
