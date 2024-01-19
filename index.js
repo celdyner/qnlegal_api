@@ -8,10 +8,8 @@ const { connect } = require("mongoose");
 
 const app = express();
 
-
-
+// Enable CORS for all routes
 app.use(cors());
-
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -23,6 +21,13 @@ app.use(paginate.middleware(process.env.LIMIT, process.env.MAX_LIMIT));
 
 const router = require("./routes/index");
 app.use(router);
+
+// Set CORS headers for all routes
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 // Add a route handler for the root path ("/")
 app.get("/", (req, res) => {
