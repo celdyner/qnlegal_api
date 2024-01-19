@@ -32,7 +32,6 @@ app.use(router);
 
 // Add a route handler for the root path ("/")
 app.get("/", (req, res) => {
-  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.send("Hello, this is your API root!");
 });
 
