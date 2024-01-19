@@ -215,7 +215,9 @@ const validateEmail = async (email) => {
 
 // Helper function to normalize email
 const normalizeEmail = (email) => {
-  return email.toLowerCase(); // You can add more normalization logic if needed
+  const [localPart, domain] = email.split('@');
+  const normalizedLocalPart = localPart.replace(/\./g, ''); // Remove dots in the local part
+  return `${normalizedLocalPart}@${domain.toLowerCase()}`;
 };
 
 module.exports = {
