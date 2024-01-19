@@ -8,8 +8,16 @@ const { connect } = require("mongoose");
 
 const app = express();
 
-// Enable CORS for all routes
-app.use(cors());
+// Advanced CORS configuration
+const corsOptions = {
+  origin: "https://qnlegal.org", // Specify the allowed origin
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Specify the allowed HTTP methods
+  credentials: true, // Allow credentials (cookies, HTTP authentication) to be sent with the request
+  optionsSuccessStatus: 204, // Respond with a 204 status for preflight requests
+  allowedHeaders: "Origin,X-Requested-With,Content-Type,Accept,Authorization", // Specify the allowed headers
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -21,13 +29,6 @@ app.use(paginate.middleware(process.env.LIMIT, process.env.MAX_LIMIT));
 
 const router = require("./routes/index");
 app.use(router);
-
-// Set CORS headers for all routes
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
 
 // Add a route handler for the root path ("/")
 app.get("/", (req, res) => {
